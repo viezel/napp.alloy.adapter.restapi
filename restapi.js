@@ -194,6 +194,9 @@ function Sync(model, method, opts) {
 //we need underscore
 var _ = require("alloy/underscore")._;
 
+//until this issue is fixed: https://jira.appcelerator.org/browse/TIMOB-11752
+var Alloy = require("alloy"), Backbone = Alloy.Backbone;
+
 module.exports.sync = Sync;
 
 module.exports.beforeModelCreate = function(config) {

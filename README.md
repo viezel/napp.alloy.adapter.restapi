@@ -28,20 +28,6 @@ Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
 
 Then add the `restapi.js` to `PROJECT_FOLDER/assets/alloy/sync/`. Create the folders if they dont exist. 
 
-### Url parameters
-
-Some will need to use url parameters in order to connect to there respective API.
-
-	collection.fetch({
-		urlparams:{
-			category:12,
-			foo:bar
-		}
-	});
-	
-Will result in `http://example.com/api/modelname?category=12&foo=bar`
-
-
 ## Author
 
 **Mads Møller**  

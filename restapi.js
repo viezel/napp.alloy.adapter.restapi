@@ -1,3 +1,11 @@
+/**
+ * Rest API Adapter for Titanium Alloy
+ * @author Mads Møller
+ * @version 1.0.2
+ * Copyright Napp ApS
+ * www.napp.dk
+ */
+
 var RestAPIBaseUrl = null;
 
 function S4() {
@@ -164,6 +172,10 @@ function Sync(model, method, opts) {
 				params.url = params.url + '/' + model.id; 
             }
             
+            if(params.urlparams){
+				params.url += "?"+encodeData(params.urlparams);
+			}
+            
             apiCall(params, function(_response) {
                 if (_response.success) {
                     var data = JSON.parse(_response.responseText);
@@ -190,6 +202,13 @@ function Sync(model, method, opts) {
     }
 
 };
+
+var encodeData = function(obj) {
+	var str = [];
+	for(var p in obj)
+		str.push(Ti.Network.encodeURIComponent(p) + "=" + Ti.Network.encodeURIComponent(obj[p]));
+	return str.join("&"); 
+}
 
 //we need underscore
 var _ = require("alloy/underscore")._;

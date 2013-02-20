@@ -219,13 +219,13 @@ var Alloy = require("alloy"), Backbone = Alloy.Backbone;
 
 module.exports.sync = Sync;
 
-module.exports.beforeModelCreate = function(config) {
+module.exports.beforeModelCreate = function(config, name) {
 	config = config || {};
 	InitAdapter(config);
 	return config;
 };
 
-module.exports.afterModelCreate = function(Model) {
+module.exports.afterModelCreate = function(Model, name) {
 	Model = Model || {};
 	Model.prototype.config.Model = Model;
 	return Model;

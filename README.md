@@ -11,6 +11,7 @@ Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
 	exports.definition = {	
 		config: {
 			"URL": "http://example.com/api/modelname",
+			//"debug": 1, 
 			"adapter": {
 				"type": "restapi",
 				"collection_name": "mymodelname"
@@ -27,6 +28,27 @@ Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
 	}
 
 Then add the `restapi.js` to `PROJECT_FOLDER/assets/alloy/sync/`. Create the folders if they dont exist. 
+
+Use the `debug` property in the above example to get logs printed with server response to debug your usage of the restapi adapter.
+
+
+## Changelog
+
+**v1.0.4**
+Added debug
+
+**v1.0.3**
+Alloy 1.0.0. 
+Fix bug in rest url being global 
+
+**v1.0.2**
+Added urlparams
+
+**v1.0.1**
+Android bugfixes
+
+**v1.0**
+init
 
 ## Author
 

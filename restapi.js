@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.0.3
+ * @version 1.0.4
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -19,7 +19,6 @@ function InitAdapter(config) {
 }
 
 function apiCall(_options, _callback) {
-	Ti.API.debug("[REST API] apiCall ", _options);
 	var xhr = Ti.Network.createHTTPClient({
 		timeout : 5000
 	});
@@ -55,6 +54,7 @@ function apiCall(_options, _callback) {
 }
 
 function Sync(method, model, opts) {
+	var DEBUG = model.config.debug;
 	var methodMap = {
 		'create' : 'POST',
 		'read' : 'GET',
@@ -102,7 +102,10 @@ function Sync(method, model, opts) {
 
 	//json data transfers
 	params.headers['Content-Type'] = 'application/json';
-
+	
+	if(DEBUG){ 
+		Ti.API.debug("[REST API] REST METHOD: " + method); 
+	}
 	switch(method) {
 
 		case 'delete' :
@@ -112,10 +115,18 @@ function Sync(method, model, opts) {
 				return;
 			}
 			params.url = params.url + '/' + model.id;
-
+						
+			if(DEBUG){
+				Ti.API.info("[REST API] options: ");
+				Ti.API.info(params);
+			}
 			apiCall(params, function(_response) {
 				if (_response.success) {
 					var data = JSON.parse(_response.responseText);
+					if(DEBUG){ 
+						Ti.API.info("[REST API] server delete response: ");
+						Ti.API.debug(data) 
+					}
 					params.success(null, _response.responseText);
 					model.trigger("fetch");
 					// fire event
@@ -128,10 +139,17 @@ function Sync(method, model, opts) {
 		case 'create' :
 			// convert to string for API call
 			params.data = JSON.stringify(model.toJSON());
-
+			if(DEBUG){
+				Ti.API.info("[REST API] options: ");
+				Ti.API.info(params);
+			}
 			apiCall(params, function(_response) {
 				if (_response.success) {
 					var data = JSON.parse(_response.responseText);
+					if(DEBUG){ 
+						Ti.API.info("[REST API] server create response: ");
+						Ti.API.debug(data) 
+					}
 					//Rest API should return a new model id.
 					if (data.id == undefined) {
 						data.id = guid();
@@ -156,10 +174,17 @@ function Sync(method, model, opts) {
 			// setup the url & data
 			params.url = params.url + '/' + model.id;
 			params.data = JSON.stringify(model.toJSON());
-
+			if(DEBUG){
+				Ti.API.info("[REST API] options: ");
+				Ti.API.info(params);
+			}
 			apiCall(params, function(_response) {
 				if (_response.success) {
 					var data = JSON.parse(_response.responseText);
+					if(DEBUG){ 
+						Ti.API.info("[REST API] server update response: ");
+						Ti.API.debug(data) 
+					}
 					params.success(data, JSON.stringify(data));
 					model.trigger("fetch");
 				} else {
@@ -177,10 +202,17 @@ function Sync(method, model, opts) {
 			if (params.urlparams) {
 				params.url += "?" + encodeData(params.urlparams);
 			}
-
+			if(DEBUG){
+				Ti.API.info("[REST API] options: ");
+				Ti.API.info(params);
+			}
 			apiCall(params, function(_response) {
 				if (_response.success) {
 					var data = JSON.parse(_response.responseText);
+					if(DEBUG){ 
+						Ti.API.info("[REST API] server read response: ");
+						Ti.API.debug(data) 
+					}
 					var values = [];
 					model.length = 0;
 					for (var i in data) {

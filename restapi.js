@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.0.4
+ * @version 1.0.5
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -28,17 +28,22 @@ function apiCall(_options, _callback) {
 
 	xhr.onload = function() {
 		_callback({
-			success : true,
+			success: true,
+			status: xhr.status == 200 ? "ok" : xhr.status,
+			code: xhr.status,
 			responseText : xhr.responseText || null,
 			responseData : xhr.responseData || null
 		});
 	};
 
 	//Handle error
-	xhr.onerror = function() {
+	xhr.onerror = function(e) {
 		_callback({
-			'success' : false,
-			'responseText' : xhr.responseText
+			success: false,
+			status: "error",
+			code: xhr.status,
+			data: e.error,
+			responseText : xhr.responseText
 		});
 		Ti.API.error('[REST API] apiCall ERROR: ' + xhr.responseText)
 	}
@@ -132,7 +137,8 @@ function Sync(method, model, opts) {
 					// fire event
 				} else {
 					params.error(JSON.parse(_response.responseText), _response.responseText);
-					Ti.API.error('SYNC ERROR: ' + _response.responseText)
+					Ti.API.error('[REST API] DELETE ERROR: ');
+					Ti.API.error(_response);
 				}
 			});
 			break;
@@ -160,7 +166,8 @@ function Sync(method, model, opts) {
 					// fire event
 				} else {
 					params.error(JSON.parse(_response.responseText), _response.responseText);
-					Ti.API.error('[REST API] ERROR: ' + _response.responseText)
+					Ti.API.error('[REST API] CREATE ERROR: ');
+					Ti.API.error(_response);
 				}
 			});
 			break;
@@ -189,7 +196,8 @@ function Sync(method, model, opts) {
 					model.trigger("fetch");
 				} else {
 					params.error(JSON.parse(_response.responseText), _response.responseText);
-					Ti.API.error("[REST API] ERROR: " + _response.responseText);
+					Ti.API.error('[REST API] UPDATE ERROR: ');
+					Ti.API.error(_response);
 				}
 			});
 			break;
@@ -229,7 +237,8 @@ function Sync(method, model, opts) {
 					model.trigger("fetch");
 				} else {
 					params.error(JSON.parse(_response.responseText), _response.responseText);
-					Ti.API.error('[REST API] ERROR: ' + _response.responseText)
+					Ti.API.error('[REST API] READ ERROR: ');
+					Ti.API.error(_response);
 				}
 			})
 			break;

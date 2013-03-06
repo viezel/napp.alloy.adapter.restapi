@@ -34,6 +34,9 @@ Use the `debug` property in the above example to get logs printed with server re
 
 ## Changelog
 
+**v1.0.5**
+Added HTTP Response code and error message
+
 **v1.0.4**
 Added debug
 

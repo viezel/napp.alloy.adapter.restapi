@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.0.5
+ * @version 1.0.6
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -60,6 +60,7 @@ function apiCall(_options, _callback) {
 
 function Sync(method, model, opts) {
 	var DEBUG = model.config.debug;
+	model.idAttribute = model.config.adapter.idAttribute || "id";
 	var methodMap = {
 		'create' : 'POST',
 		'read' : 'GET',
@@ -114,12 +115,12 @@ function Sync(method, model, opts) {
 	switch(method) {
 
 		case 'delete' :
-			if (!model.id) {
+			if (!model[model.idAttribute]) {
 				params.error(null, "MISSING MODEL ID");
 				Ti.API.error("[REST API] ERROR: MISSING MODEL ID");
 				return;
 			}
-			params.url = params.url + '/' + model.id;
+			params.url = params.url + '/' + model[model.idAttribute];
 						
 			if(DEBUG){
 				Ti.API.info("[REST API] options: ");
@@ -130,7 +131,7 @@ function Sync(method, model, opts) {
 					var data = JSON.parse(_response.responseText);
 					if(DEBUG){ 
 						Ti.API.info("[REST API] server delete response: ");
-						Ti.API.debug(data) 
+						Ti.API.info(data) 
 					}
 					params.success(null, _response.responseText);
 					model.trigger("fetch");
@@ -154,16 +155,14 @@ function Sync(method, model, opts) {
 					var data = JSON.parse(_response.responseText);
 					if(DEBUG){ 
 						Ti.API.info("[REST API] server create response: ");
-						Ti.API.debug(data) 
+						Ti.API.info(data) 
 					}
 					//Rest API should return a new model id.
-					if (data.id == undefined) {
-						data.id = guid();
-						//if not - create one
+					if (data[model.idAttribute] == undefined) {
+						data[model.idAttribute] = guid(); //if not - create one
 					}
 					params.success(data, JSON.stringify(data));
-					model.trigger("fetch");
-					// fire event
+					model.trigger("fetch"); // fire event
 				} else {
 					params.error(JSON.parse(_response.responseText), _response.responseText);
 					Ti.API.error('[REST API] CREATE ERROR: ');
@@ -172,14 +171,14 @@ function Sync(method, model, opts) {
 			});
 			break;
 		case 'update' :
-			if (!model.id) {
+			if (!model[model.idAttribute]) {
 				params.error(null, "MISSING MODEL ID");
 				Ti.API.error("[REST API] ERROR: MISSING MODEL ID");
 				return;
 			}
 
 			// setup the url & data
-			params.url = params.url + '/' + model.id;
+			params.url = params.url + '/' + model[model.idAttribute];
 			params.data = JSON.stringify(model.toJSON());
 			if(DEBUG){
 				Ti.API.info("[REST API] options: ");
@@ -190,7 +189,7 @@ function Sync(method, model, opts) {
 					var data = JSON.parse(_response.responseText);
 					if(DEBUG){ 
 						Ti.API.info("[REST API] server update response: ");
-						Ti.API.debug(data) 
+						Ti.API.info(data) 
 					}
 					params.success(data, JSON.stringify(data));
 					model.trigger("fetch");
@@ -203,8 +202,8 @@ function Sync(method, model, opts) {
 			break;
 
 		case 'read':
-			if (model.id) {
-				params.url = params.url + '/' + model.id;
+			if (model[model.idAttribute]) {
+				params.url = params.url + '/' + model[model.idAttribute];
 			}
 
 			if (params.urlparams) {
@@ -219,15 +218,15 @@ function Sync(method, model, opts) {
 					var data = JSON.parse(_response.responseText);
 					if(DEBUG){ 
 						Ti.API.info("[REST API] server read response: ");
-						Ti.API.debug(data) 
+						Ti.API.info(data) 
 					}
 					var values = [];
 					model.length = 0;
 					for (var i in data) {
 						var item = {};
 						item = data[i];
-						if (item.id == undefined) {
-							item.id = guid();
+						if (item[model.idAttribute] == undefined) {
+							item[model.idAttribute] = guid();
 						}
 						values.push(item);
 						model.length++;
@@ -269,5 +268,6 @@ module.exports.beforeModelCreate = function(config, name) {
 module.exports.afterModelCreate = function(Model, name) {
 	Model = Model || {};
 	Model.prototype.config.Model = Model;
+	Model.prototype.idAttribute = Model.prototype.config.adapter.idAttribute;
 	return Model;
 }; 

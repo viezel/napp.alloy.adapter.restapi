@@ -14,7 +14,8 @@ Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
 			//"debug": 1, 
 			"adapter": {
 				"type": "restapi",
-				"collection_name": "mymodelname"
+				"collection_name": "mymodelname",
+				"idAttribute": "id"
 			}
 		},		
 		extendModel: function(Model) {		
@@ -34,23 +35,26 @@ Use the `debug` property in the above example to get logs printed with server re
 
 ## Changelog
 
-**v1.0.5**
+**v1.0.6**  
+Added support for idAttribute
+
+**v1.0.5**  
 Added HTTP Response code and error message
 
-**v1.0.4**
+**v1.0.4**  
 Added debug
 
-**v1.0.3**
-Alloy 1.0.0. 
+**v1.0.3**  
+Alloy 1.0.0.  
 Fix bug in rest url being global 
 
-**v1.0.2**
+**v1.0.2**  
 Added urlparams
 
-**v1.0.1**
+**v1.0.1**  
 Android bugfixes
 
-**v1.0**
+**v1.0**  
 init
 
 ## Author

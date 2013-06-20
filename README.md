@@ -14,9 +14,14 @@ Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
 			//"debug": 1, 
 			"adapter": {
 				"type": "restapi",
-				"collection_name": "mymodelname",
+				"collection_name": "MyCollection",
 				"idAttribute": "id"
-			}
+			},
+			"headers": { // your custom headers
+	            "Accept": "application/vnd.stackmob+json; version=0",
+		        "X-StackMob-API-Key": "your-stackmob-key"
+	        },
+	        "parentNode": "news.domestic" //your root node
 		},		
 		extendModel: function(Model) {		
 			_.extend(Model.prototype, {});
@@ -32,8 +37,64 @@ Then add the `restapi.js` to `PROJECT_FOLDER/app/assets/alloy/sync/`. Create the
 
 Use the `debug` property in the above example to get logs printed with server response to debug your usage of the restapi adapter.
 
+### Lets see this in action
+
+In your Alloy controller, do would use the REST API adapter like this:
+
+```javascript
+var collection = Alloy.createCollection("MyCollection"); //or model
+//the fetch method is an async call to the remote REST API. 
+collection.fetch({ 
+	success : function(){
+		_.each(collection.models, function(element, index, list){
+			// We are looping through the returned models from the remote REST API
+			// Implement your custom logic here
+		});
+	},
+	error : function(){
+		Ti.API.error("hmm - this is not good!");
+	}
+});
+```
+
+
+## Special Properties
+
+
+### Custom Headers
+
+Define your own custom headers. E.g. to add a BaaS API
+
+	"headers": {
+		"Accept": "application/vnd.stackmob+json; version=0",
+		"X-StackMob-API-Key": "your-stackmob-key"
+	}
+
+### Nested Result Objects
+
+Lets say you have a REST API where the result objects are nested. Like the Twitter search API. It has the found tweets in a results object. 
+Use the `parentNode` to specify from which root object you want to parse children objects. 
+
+	config: {
+		...
+		"parentNode" : "results"
+	}
+	
+It has support for nested objects. 
+	
+	config: {
+		...
+		"parentNode" : "news.domestic"
+	}
+
+
 
 ## Changelog
+
+**v1.1.0**  
+Added support for Nested Result Objects  
+Added support for Custom Headers  
+Code cleanup  
 
 **v1.0.6**  
 Added support for idAttribute
@@ -66,7 +127,7 @@ twitter: @nappdev
 
 ## License
 
-    Copyright (c) 2010-2011 Mads Møller
+    Copyright (c) 2010-2013 Mads Møller
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal

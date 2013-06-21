@@ -139,7 +139,7 @@ function Sync(method, model, opts) {
 			
 			apiCall(params, function(_response) {
 				if (_response.success) {
-					var data = parseJSON(_response, parentNode);
+					var data = parseJSON(DEBUG, _response, parentNode);
 					
 					//Rest API should return a new model id.
 					if (data[model.idAttribute] == undefined) {
@@ -170,7 +170,7 @@ function Sync(method, model, opts) {
 			
 			apiCall(params, function(_response) {
 				if (_response.success) {
-					var data = parseJSON(_response, parentNode);
+					var data = parseJSON(DEBUG, _response, parentNode);
 					var values = [];
 					model.length = 0;
 					for (var i in data) {
@@ -218,7 +218,7 @@ function Sync(method, model, opts) {
 			
 			apiCall(params, function(_response) {
 				if (_response.success) {
-					var data = parseJSON(_response, parentNode);
+					var data = parseJSON(DEBUG, _response, parentNode);
 					params.success(data, JSON.stringify(data));
 					model.trigger("fetch");
 				} else {
@@ -241,7 +241,7 @@ function Sync(method, model, opts) {
 			
 			apiCall(params, function(_response) {
 				if (_response.success) {
-					var data = parseJSON(_response, parentNode);
+					var data = parseJSON(DEBUG, _response, parentNode);
 					params.success(null, _response.responseText);
 					model.trigger("fetch");
 				} else {
@@ -266,7 +266,7 @@ function logger(DEBUG, message, data) {
 	}
 }
 
-function parseJSON(_response, parentNode){
+function parseJSON(DEBUG, _response, parentNode){
 	var data = JSON.parse(_response.responseText);
 	if(!_.isUndefined(parentNode)){
 		data = traverseProperties(data, parentNode);

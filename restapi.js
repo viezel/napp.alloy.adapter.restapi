@@ -269,7 +269,7 @@ function logger(DEBUG, message, data) {
 function parseJSON(DEBUG, _response, parentNode){
 	var data = JSON.parse(_response.responseText);
 	if(!_.isUndefined(parentNode)){
-		data = traverseProperties(data, parentNode);
+		data = _.isFunction(parentNode) ? parentNode(data) : traverseProperties(data, parentNode);
 	}
 	logger(DEBUG, "server response" , data);
 	return data;

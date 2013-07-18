@@ -75,6 +75,7 @@ Define your own custom headers. E.g. to add a BaaS API
 Lets say you have a REST API where the result objects are nested. Like the Twitter search API. It has the found tweets in a results object. 
 Use the `parentNode` to specify from which root object you want to parse children objects. 
 
+
 	config: {
 		...
 		"parentNode" : "results"
@@ -87,9 +88,39 @@ It has support for nested objects.
 		"parentNode" : "news.domestic"
 	}
 
+Since v1.1.1 - you can specify this object as a function instead to custom parse the feed. Here is an example: 
+
+*Feed:* 
+http://www.google.com/calendar/feeds/developer-calendar@google.com/public/full?alt=json&orderby=starttime&max-results=15&singleevents=true&sortorder=ascending&futureevents=true
+
+*Custom parsing:*
+
+```javascript
+parentNode: function (data) {
+	var entries = [];
+
+	_.each(data.feed.entry, function(_entry) {
+		var entry = {};
+
+		entry.id = _entry.id.$t;
+		entry.startTime = _entry.gd$when[0].startTime;
+		entry.endTime = _entry.gd$when[0].endTime;
+		entry.title = _entry.title.$t;
+		entry.content = _entry.content.$t;
+
+		entries.push(entry);
+	});
+
+	return entries;
+}
+```
+
 
 
 ## Changelog
+
+**v1.1.1**  
+Added support parentNode as a function for custom parsing. thanks @FokkeZB
 
 **v1.1.0**  
 Added support for Nested Result Objects  

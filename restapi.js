@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.1.0
+ * @version 1.1.1
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -261,7 +261,7 @@ function Sync(method, model, opts) {
 
 function logger(DEBUG, message, data) {
 	if(DEBUG){ 
-		Ti.API.debug("[SQL REST API] " + message);
+		Ti.API.debug("[REST API] " + message);
 		Ti.API.debug(data) 
 	}
 }

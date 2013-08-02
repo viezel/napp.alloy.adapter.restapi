@@ -28,23 +28,43 @@ function apiCall(_options, _callback) {
 		xhr.open(_options.type, _options.url);
 	
 		xhr.onload = function() {
+		  var responseJSON,
+		      success = true,
+		      error;
+		      
+		  try {
+		    responseJSON = JSON.parse(xhr.responseText);
+		  } catch (e) {
+		    Ti.API.error('[REST API] apiCall ERROR: ' + e.message);
+		    success = false;
+		    error = e.message;
+		  }
+		      
 			_callback({
-				success : true,
-				status : xhr.status == 200 ? "ok" : xhr.status,
+				success : success,
+				status : success ? (xhr.status == 200 ? "ok" : xhr.status) : 'error',
 				code : xhr.status,
+				data: error,
 				responseText : xhr.responseText || null,
-				responseData : xhr.responseData || null
+				responseJSON : responseJSON || null
 			});
 		};
 	
 		//Handle error
 		xhr.onerror = function(e) {
+		  var responseJSON;
+		  
+		  try {
+		    responseJSON = JSON.parse(xhr.responseText);
+		  } catch (e) {}
+		  
 			_callback({
 				success : false,
 				status : "error",
 				code : xhr.status,
 				data : e.error,
-				responseText : xhr.responseText
+				responseText : xhr.responseText,
+				responseJSON: responseJSON || null
 			});
 			Ti.API.error('[REST API] apiCall ERROR: ' + xhr.responseText);
 			Ti.API.error('[SQL REST API] apiCall ERROR CODE: ' + xhr.status);
@@ -150,7 +170,7 @@ function Sync(method, model, opts) {
 					model.trigger("fetch");
 					// fire event
 				} else {
-					params.error(JSON.parse(_response.responseText), _response.responseText);
+					params.error(_response.responseJSON, _response.responseText);
 					Ti.API.error('[REST API] CREATE ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -186,7 +206,7 @@ function Sync(method, model, opts) {
 					params.success((model.length === 1) ? values[0] : values, _response.responseText);
 					model.trigger("fetch");
 				} else {
-					params.error(JSON.parse(_response.responseText), _response.responseText);
+					params.error(_response.responseJSON, _response.responseText);
 					Ti.API.error('[REST API] READ ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -222,7 +242,7 @@ function Sync(method, model, opts) {
 					params.success(data, JSON.stringify(data));
 					model.trigger("fetch");
 				} else {
-					params.error(JSON.parse(_response.responseText), _response.responseText);
+					params.error(_response.responseJSON, _response.responseText);
 					Ti.API.error('[REST API] UPDATE ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -245,7 +265,7 @@ function Sync(method, model, opts) {
 					params.success(null, _response.responseText);
 					model.trigger("fetch");
 				} else {
-					params.error(JSON.parse(_response.responseText), _response.responseText);
+					params.error(_response.responseJSON, _response.responseText);
 					Ti.API.error('[REST API] DELETE ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -267,7 +287,7 @@ function logger(DEBUG, message, data) {
 }
 
 function parseJSON(DEBUG, _response, parentNode){
-	var data = JSON.parse(_response.responseText);
+	var data = _response.responseJSON;
 	if(!_.isUndefined(parentNode)){
 		data = _.isFunction(parentNode) ? parentNode(data) : traverseProperties(data, parentNode);
 	}

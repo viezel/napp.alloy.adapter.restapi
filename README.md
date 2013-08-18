@@ -119,6 +119,9 @@ parentNode: function (data) {
 
 ## Changelog
 
+**v1.1.2**  
+JSON.parse errors are now caught. Thanks @FokkeZB
+
 **v1.1.1**  
 Added support parentNode as a function for custom parsing. thanks @FokkeZB
 

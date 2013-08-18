@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.1.1
+ * @version 1.1.2
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -23,60 +23,61 @@ function apiCall(_options, _callback) {
 		var xhr = Ti.Network.createHTTPClient({
 			timeout : _options.timeout || 7000
 		});
-	
+
 		//Prepare the request
 		xhr.open(_options.type, _options.url);
-	
+
 		xhr.onload = function() {
-		  var responseJSON,
-		      success = true,
-		      error;
-		      
-		  try {
-		    responseJSON = JSON.parse(xhr.responseText);
-		  } catch (e) {
-		    Ti.API.error('[REST API] apiCall ERROR: ' + e.message);
-		    success = false;
-		    error = e.message;
-		  }
-		      
+			var responseJSON, success = true, error;
+
+			try {
+				responseJSON = JSON.parse(xhr.responseText);
+			} catch (e) {
+				Ti.API.error('[REST API] apiCall ERROR: ' + e.message);
+				success = false;
+				error = e.message;
+			}
+
 			_callback({
 				success : success,
 				status : success ? (xhr.status == 200 ? "ok" : xhr.status) : 'error',
 				code : xhr.status,
-				data: error,
+				data : error,
 				responseText : xhr.responseText || null,
 				responseJSON : responseJSON || null
 			});
 		};
-	
+
 		//Handle error
 		xhr.onerror = function(e) {
-		  var responseJSON;
-		  
-		  try {
-		    responseJSON = JSON.parse(xhr.responseText);
-		  } catch (e) {}
-		  
+			var responseJSON;
+
+			try {
+				responseJSON = JSON.parse(xhr.responseText);
+			} catch (e) {
+			}
+
 			_callback({
 				success : false,
 				status : "error",
 				code : xhr.status,
 				data : e.error,
 				responseText : xhr.responseText,
-				responseJSON: responseJSON || null
+				responseJSON : responseJSON || null
 			});
 			Ti.API.error('[REST API] apiCall ERROR: ' + xhr.responseText);
-			Ti.API.error('[SQL REST API] apiCall ERROR CODE: ' + xhr.status);
-		}
+			Ti.API.error('[REST API] apiCall ERROR CODE: ' + xhr.status);
+		};
+		
+		// headers
 		for (var header in _options.headers) {
 			xhr.setRequestHeader(header, _options.headers[header]);
 		}
-	
+
 		if (_options.beforeSend) {
 			_options.beforeSend(xhr);
 		}
-	
+
 		xhr.send(_options.data || null);
 	} else {
 		// Offline
@@ -92,13 +93,13 @@ function Sync(method, model, opts) {
 	var DEBUG = model.config.debug;
 	model.idAttribute = model.config.adapter.idAttribute || "id";
 	var parentNode = model.config.parentNode;
-	
+
 	// REST - CRUD
 	var methodMap = {
-		'create' 	: 'POST',
-		'read' 		: 'GET',
-		'update' 	: 'PUT',
-		'delete' 	: 'DELETE'
+		'create' : 'POST',
+		'read' : 'GET',
+		'update' : 'PUT',
+		'delete' : 'DELETE'
 	};
 
 	var type = methodMap[method];
@@ -107,14 +108,14 @@ function Sync(method, model, opts) {
 
 	//set default headers
 	params.headers = params.headers || {};
-	
+
 	// Send our own custom headers
-	if(model.config.hasOwnProperty("headers")) {
-		for(header in model.config.headers) {
+	if (model.config.hasOwnProperty("headers")) {
+		for (header in model.config.headers) {
 			params.headers[header] = model.config.headers[header];
 		}
 	}
-	
+
 	// We need to ensure that we have a base url.
 	if (!params.url) {
 		params.url = (model.config.URL || model.url());
@@ -141,7 +142,7 @@ function Sync(method, model, opts) {
 				params.data._method = type;
 			params.type = 'POST';
 			params.beforeSend = function(xhr) {
-				params.headers['X-HTTP-Method-Override'] = type
+				params.headers['X-HTTP-Method-Override'] = type;
 			};
 		}
 	}
@@ -149,18 +150,18 @@ function Sync(method, model, opts) {
 	//json data transfers
 	params.headers['Content-Type'] = 'application/json';
 
-	logger(DEBUG, "REST METHOD" , method);
-	
+	logger(DEBUG, "REST METHOD", method);
+
 	switch(method) {
 		case 'create' :
 			// convert to string for API call
 			params.data = JSON.stringify(model.toJSON());
-			logger(DEBUG, "create options" , params);
-			
+			logger(DEBUG, "create options", params);
+
 			apiCall(params, function(_response) {
 				if (_response.success) {
 					var data = parseJSON(DEBUG, _response, parentNode);
-					
+
 					//Rest API should return a new model id.
 					if (data[model.idAttribute] == undefined) {
 						//if not - create one
@@ -176,18 +177,18 @@ function Sync(method, model, opts) {
 				}
 			});
 			break;
-			
+
 		case 'read':
 			if (model[model.idAttribute]) {
 				params.url = params.url + '/' + model[model.idAttribute];
 			}
 
-			if(params.urlparams){ // build url with parameters
-                params.url = encodeData(params.urlparams, params.url);
-            }
-            
-			logger(DEBUG, "read options" , params);
-			
+			if (params.urlparams) {// build url with parameters
+				params.url = encodeData(params.urlparams, params.url);
+			}
+
+			logger(DEBUG, "read options", params);
+
 			apiCall(params, function(_response) {
 				if (_response.success) {
 					var data = parseJSON(DEBUG, _response, parentNode);
@@ -210,9 +211,9 @@ function Sync(method, model, opts) {
 					Ti.API.error('[REST API] READ ERROR: ');
 					Ti.API.error(_response);
 				}
-			})
+			});
 			break;
-		
+
 		case 'update' :
 			if (!model[model.idAttribute]) {
 				params.error(null, "MISSING MODEL ID");
@@ -221,21 +222,21 @@ function Sync(method, model, opts) {
 			}
 
 			// setup the url & data
-			if(_.indexOf(params.url, "?") == -1) {
+			if (_.indexOf(params.url, "?") == -1) {
 				params.url = params.url + '/' + model[model.idAttribute];
 			} else {
 				var str = params.url.split("?");
 				params.url = str[0] + '/' + model[model.idAttribute] + "?" + str[1];
 			}
-			
-			if(params.urlparams){
-                params.url = encodeData(params.urlparams, params.url);
-            }
-            
+
+			if (params.urlparams) {
+				params.url = encodeData(params.urlparams, params.url);
+			}
+
 			params.data = JSON.stringify(model.toJSON());
 
-			logger(DEBUG, "update options" , params);
-			
+			logger(DEBUG, "update options", params);
+
 			apiCall(params, function(_response) {
 				if (_response.success) {
 					var data = parseJSON(DEBUG, _response, parentNode);
@@ -248,7 +249,7 @@ function Sync(method, model, opts) {
 				}
 			});
 			break;
-			
+
 		case 'delete' :
 			if (!model[model.idAttribute]) {
 				params.error(null, "MISSING MODEL ID");
@@ -257,8 +258,8 @@ function Sync(method, model, opts) {
 			}
 			params.url = params.url + '/' + model[model.idAttribute];
 
-			logger(DEBUG, "delete options" , params);
-			
+			logger(DEBUG, "delete options", params);
+
 			apiCall(params, function(_response) {
 				if (_response.success) {
 					var data = parseJSON(DEBUG, _response, parentNode);
@@ -280,18 +281,18 @@ function Sync(method, model, opts) {
 /////////////////////////////////////////////
 
 function logger(DEBUG, message, data) {
-	if(DEBUG){ 
+	if (DEBUG) {
 		Ti.API.debug("[REST API] " + message);
-		Ti.API.debug(data) 
+		Ti.API.debug(data);
 	}
 }
 
-function parseJSON(DEBUG, _response, parentNode){
+function parseJSON(DEBUG, _response, parentNode) {
 	var data = _response.responseJSON;
-	if(!_.isUndefined(parentNode)){
+	if (!_.isUndefined(parentNode)) {
 		data = _.isFunction(parentNode) ? parentNode(data) : traverseProperties(data, parentNode);
 	}
-	logger(DEBUG, "server response" , data);
+	logger(DEBUG, "server response", data);
 	return data;
 }
 
@@ -305,17 +306,16 @@ function traverseProperties(object, string) {
 
 function encodeData(obj, url) {
 	var str = [];
-	for(var p in obj){
+	for (var p in obj) {
 		str.push(Ti.Network.encodeURIComponent(p) + "=" + Ti.Network.encodeURIComponent(obj[p]));
 	}
-		
-	if(_.indexOf(url, "?") == -1) {
+
+	if (_.indexOf(url, "?") == -1) {
 		return url + "?" + str.join("&");
 	} else {
 		return url + "&" + str.join("&");
 	}
 }
-
 
 //we need underscore
 var _ = require("alloy/underscore")._;

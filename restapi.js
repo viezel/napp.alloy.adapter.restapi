@@ -111,7 +111,7 @@ function Sync(method, model, opts) {
 
 	// Send our own custom headers
 	if (model.config.hasOwnProperty("headers")) {
-		for (header in model.config.headers) {
+		for (var header in model.config.headers) {
 			params.headers[header] = model.config.headers[header];
 		}
 	}
@@ -163,7 +163,7 @@ function Sync(method, model, opts) {
 					var data = parseJSON(DEBUG, _response, parentNode);
 
 					//Rest API should return a new model id.
-					if (data[model.idAttribute] == undefined) {
+					if (data[model.idAttribute] === undefined) {
 						//if not - create one
 						data[model.idAttribute] = guid();
 					}
@@ -197,7 +197,7 @@ function Sync(method, model, opts) {
 					for (var i in data) {
 						var item = {};
 						item = data[i];
-						if (item[model.idAttribute] == undefined) {
+						if (item[model.idAttribute] === undefined) {
 							item[model.idAttribute] = guid();
 						}
 						values.push(item);
@@ -274,7 +274,7 @@ function Sync(method, model, opts) {
 			break;
 	}
 
-};
+}
 
 /////////////////////////////////////////////
 // HELPERS
@@ -283,7 +283,7 @@ function Sync(method, model, opts) {
 function logger(DEBUG, message, data) {
 	if (DEBUG) {
 		Ti.API.debug("[REST API] " + message);
-		Ti.API.debug(data);
+		Ti.API.debug(typeof data === 'object' ? JSON.stringify(data) : data);
 	}
 }
 
@@ -292,7 +292,7 @@ function parseJSON(DEBUG, _response, parentNode) {
 	if (!_.isUndefined(parentNode)) {
 		data = _.isFunction(parentNode) ? parentNode(data) : traverseProperties(data, parentNode);
 	}
-	logger(DEBUG, "server response", data);
+	logger(DEBUG, "server response", _response);
 	return data;
 }
 

@@ -283,7 +283,7 @@ function Sync(method, model, opts) {
 function logger(DEBUG, message, data) {
 	if (DEBUG) {
 		Ti.API.debug("[REST API] " + message);
-		Ti.API.debug(typeof data === 'object' ? JSON.stringify(data) : data);
+		Ti.API.debug(typeof data === 'object' ? JSON.stringify(data, null, '\t') : data);
 	}
 }
 

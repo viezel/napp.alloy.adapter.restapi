@@ -125,6 +125,15 @@ function Sync(method, model, opts) {
 		}
 	}
 
+        params.urlparams = params.urlparams || {};
+        // Add in the params from the model, either from a function or literal
+        if ( typeof model.config.URLPARAMS === 'function' ) {
+            _.extend(params.urlparams, model.config.URLPARAMS());
+        }
+        else if ( typeof model.config.URLPARAMS != 'undefined' ) {
+            _.extend(params.urlparams, model.config.URLPARAMS);
+        }
+
 	// For older servers, emulate JSON by encoding the request into an HTML-form.
 	if (Alloy.Backbone.emulateJSON) {
 		params.contentType = 'application/x-www-form-urlencoded';

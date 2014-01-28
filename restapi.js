@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.1.2
+ * @version 1.1.3
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -216,7 +216,7 @@ function Sync(method, model, opts) {
 					params.success((model.length === 1) ? values[0] : values, _response.responseText);
 					model.trigger("fetch");
 				} else {
-					params.error(_response.responseJSON, _response.responseText);
+					params.error(model, _response.responseText);
 					Ti.API.error('[REST API] READ ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -252,7 +252,7 @@ function Sync(method, model, opts) {
 					params.success(data, JSON.stringify(data));
 					model.trigger("fetch");
 				} else {
-					params.error(_response.responseJSON, _response.responseText);
+					params.error(model, _response.responseText);
 					Ti.API.error('[REST API] UPDATE ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -275,7 +275,7 @@ function Sync(method, model, opts) {
 					params.success(null, _response.responseText);
 					model.trigger("fetch");
 				} else {
-					params.error(_response.responseJSON, _response.responseText);
+					params.error(model, _response.responseText);
 					Ti.API.error('[REST API] DELETE ERROR: ');
 					Ti.API.error(_response);
 				}

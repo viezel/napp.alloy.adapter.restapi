@@ -119,6 +119,9 @@ parentNode: function (data) {
 
 ## Changelog
 
+**v1.1.3**  
+Added support for accessing the error object. Issue #29 Thanks @alexandremblah
+
 **v1.1.2**  
 JSON.parse errors are now caught. Thanks @FokkeZB
 

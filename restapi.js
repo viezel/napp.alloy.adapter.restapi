@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.1.3
+ * @version 1.1.4
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -190,6 +190,11 @@ function Sync(method, model, opts) {
 		case 'read':
 			if (model[model.idAttribute]) {
 				params.url = params.url + '/' + model[model.idAttribute];
+			}
+			
+			if (params.search) {
+				// search mode
+				params.url = params.url + "/search/" + Ti.Network.encodeURIComponent(params.search);
 			}
 
 			if (params.urlparams) {// build url with parameters

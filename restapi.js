@@ -28,72 +28,118 @@ function apiCall(_options, _callback) {
 		xhr.open(_options.type, _options.url);
 
 		xhr.onload = function() {
-			var responseJSON, success = true, error;
-
-			try {
-				responseJSON = JSON.parse(this.responseText);
-			} catch (e) {
-				Ti.API.error('[REST API] apiCall ERROR: ' + e.message);
-				success = false;
-				error = e.message;
+			var responseJSON, 
+            	success = (this.status <= 304) ? "ok" : "error",
+                status = true, 
+                error;
+			
+			// save the eTag for future reference
+			if(_options.eTagEnabled && success){
+				setETag(_options.url, xhr.getResponseHeader('ETag'));
 			}
+			
+			// we dont want to parse the JSON on a empty response
+			if(this.status != 304 && this.status != 204){
+	            // parse JSON
+	            try {
+	                responseJSON = JSON.parse(this.responseText);
+	            } catch (e) {
+	                Ti.API.error('[REST API] apiCall PARSE ERROR: ' + e.message);
+	                Ti.API.error('[REST API] apiCall PARSE ERROR: ' + this.responseText);
+	                status = false;
+	                error = e.message;
+	            }
+            }
 
 			_callback({
-				success : success,
-				status : success ? (this.status == 200 ? "ok" : this.status) : 'error',
-				code : this.status,
-				data : error,
-				responseText : this.responseText || null,
-				responseJSON : responseJSON || null
-			});
+                success: status,
+                status: success,
+                code: this.status,
+                data: error,
+                responseText: this.responseText || null,
+                responseJSON: responseJSON || null
+            });
+            
+            cleanup();
 		};
 
 		//Handle error
 		xhr.onerror = function(e) {
-			var responseJSON;
+			var responseJSON, error;
+            try {
+                responseJSON = JSON.parse(this.responseText);
+            } catch (e) {
+                error = e.message;
+            }
 
-			try {
-				responseJSON = JSON.parse(this.responseText);
-			} catch (e) {
-			}
-
-			_callback({
-				success : false,
-				status : "error",
-				code : this.status,
-				data : e.error,
-				responseText : this.responseText,
-				responseJSON : responseJSON || null
-			});
+            _callback({
+                success: false,
+                status: "error",
+                code: this.status,
+                error: err.error,
+                data: error,
+                responseText: this.responseText,
+                responseJSON: responseJSON || null
+            });
+            
 			Ti.API.error('[REST API] apiCall ERROR: ' + this.responseText);
 			Ti.API.error('[REST API] apiCall ERROR CODE: ' + this.status);
+			Ti.API.error('[REST API] apiCall ERROR MSG: ' + err.error);
+            Ti.API.error('[REST API] apiCall ERROR URL: ' + _options.url);
+            
+            cleanup();
 		};
 
 		// headers
-		for (var header in _options.headers) {
-			xhr.setRequestHeader(header, _options.headers[header]);
-		}
+        for (var header in _options.headers) {
+        	// use value or function to return value
+            xhr.setRequestHeader(header, _.isFunction(_options.headers[header]) ? _options.headers[header]() : _options.headers[header]);
+        }
 
 		if (_options.beforeSend) {
 			_options.beforeSend(xhr);
 		}
+		
+		if(_options.eTagEnabled) {
+        	var etag = getETag(_options.url);
+        	etag && xhr.setRequestHeader('IF-NONE-MATCH', etag);
+        }
 
 		xhr.send(_options.data || null);
 	} else {
-		// Offline
+		// we are offline
 		_callback({
 			success : false,
 			status : "offline",
+			offline: true,
 			responseText : null
 		});
 	}
+	
+	/**
+     * Clean up the request
+     */
+    function cleanup() {
+        xhr = null;
+        _options = null;
+        _callback = null;
+        error = null;
+        responseJSON = null;
+    }
 }
 
 function Sync(method, model, opts) {
-	var DEBUG = model.config.debug;
 	model.idAttribute = model.config.adapter.idAttribute || "id";
+	
+	// Debug mode
+	var DEBUG = model.config.debug;
+	
+	// eTag enabled
+	var eTagEnabled = model.config.eTagEnabled;
+	
+	// Used for custom parsing of the response data
 	var parentNode = model.config.parentNode;
-
+	
 	// REST - CRUD
 	var methodMap = {
 		'create' : 'POST',
@@ -193,9 +239,14 @@ function Sync(method, model, opts) {
 				params.url = params.url + "/search/" + Ti.Network.encodeURIComponent(params.search);
 			}
 
-			if (params.urlparams) {// build url with parameters
+			if (params.urlparams) {
+				// build url with parameters
 				params.url = encodeData(params.urlparams, params.url);
 			}
+			
+			if(eTagEnabled){
+            	params.eTagEnabled = true;
+            }
 
 			logger(DEBUG, "read options", params);
 
@@ -326,6 +377,29 @@ function encodeData(obj, url) {
 		return url + "?" + str.join("&");
 	} else {
 		return url + "&" + str.join("&");
+	}
+}
+
+/**
+ * Get the ETag for the given url
+ * @param {Object} url
+ */
+function getETag(url){
+	var obj = Ti.App.Properties.getObject("NAPP_REST_ADAPTER",{});
+	var data = obj[url];
+	return data || null;
+}
+ 
+/**
+ * Set the ETag for the given url
+ * @param {Object} url
+ * @param {Object} eTag
+ */
+function setETag(url, eTag){
+	if(eTag && url){
+		var obj = Ti.App.Properties.getObject("NAPP_REST_ADAPTER",{});
+		obj[url] = eTag;
+		Ti.App.Properties.setObject("NAPP_REST_ADAPTER",obj);
 	}
 }
 

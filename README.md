@@ -3,6 +3,19 @@ napp.alloy.adapter.restapi
 
 RestAPI Sync Adapter for Titanium Alloy Framework.
 
+### Response Codes
+
+The adapter has been desinged with the following structure.
+
+* **200:** The request was successful.
+* **201:** The resource was successfully created.
+* **204:** The request was successful, but we did not send any content back.
+* **304:** The request was not modified. 
+* **400:** The request failed due to an application error, such as a validation error.
+* **401:** An API key was either not sent or invalid.
+* **403:** The resource does not belong to the authenticated user and is forbidden.
+* **404:** The resource was not found.
+* **500:** A server error occurred.
 
 ## How To Use
 
@@ -115,9 +128,31 @@ parentNode: function (data) {
 }
 ```
 
+### ETag
+
+This feature will only work if your server supports ETags. If you have no idea what this is, then consult your server admin.
+Start be enabling this feature in the model config, like the following:
+
+	config: {
+		...
+		"eTagEnabled" : true
+	}
+
+You do not have to do anything more. The adapter will send and recieve the ETag for every single request and store those locally in the Ti.App.Properties namespace. 
+
+The adapter uses the `IF-NONE-MATCH` header to send the newest ETag for the provided url to the server on each request. Once a succesful response is recieved by the adapter, it will store the new ETag automatically. 
+
+**Notice: This may be a good idea not to use this while developing, because it will cache and store your ETag - which might end up in wrong situations while you are working**
 
 
 ## Changelog
+
+**v1.1.5**  
+Added ETag support  
+Bugfix for urlparams #34  
+
+
+
 
 **v1.1.4**  
 Added search mode

@@ -31,7 +31,7 @@ function apiCall(_options, _callback) {
 			var responseJSON, success = true, error;
 
 			try {
-				responseJSON = JSON.parse(xhr.responseText);
+				responseJSON = JSON.parse(this.responseText);
 			} catch (e) {
 				Ti.API.error('[REST API] apiCall ERROR: ' + e.message);
 				success = false;
@@ -40,10 +40,10 @@ function apiCall(_options, _callback) {
 
 			_callback({
 				success : success,
-				status : success ? (xhr.status == 200 ? "ok" : xhr.status) : 'error',
-				code : xhr.status,
+				status : success ? (this.status == 200 ? "ok" : this.status) : 'error',
+				code : this.status,
 				data : error,
-				responseText : xhr.responseText || null,
+				responseText : this.responseText || null,
 				responseJSON : responseJSON || null
 			});
 		};
@@ -53,22 +53,22 @@ function apiCall(_options, _callback) {
 			var responseJSON;
 
 			try {
-				responseJSON = JSON.parse(xhr.responseText);
+				responseJSON = JSON.parse(this.responseText);
 			} catch (e) {
 			}
 
 			_callback({
 				success : false,
 				status : "error",
-				code : xhr.status,
+				code : this.status,
 				data : e.error,
-				responseText : xhr.responseText,
+				responseText : this.responseText,
 				responseJSON : responseJSON || null
 			});
-			Ti.API.error('[REST API] apiCall ERROR: ' + xhr.responseText);
-			Ti.API.error('[REST API] apiCall ERROR CODE: ' + xhr.status);
+			Ti.API.error('[REST API] apiCall ERROR: ' + this.responseText);
+			Ti.API.error('[REST API] apiCall ERROR CODE: ' + this.status);
 		};
-		
+
 		// headers
 		for (var header in _options.headers) {
 			xhr.setRequestHeader(header, _options.headers[header]);
@@ -187,7 +187,7 @@ function Sync(method, model, opts) {
 			if (model[model.idAttribute]) {
 				params.url = params.url + '/' + model[model.idAttribute];
 			}
-			
+
 			if (params.search) {
 				// search mode
 				params.url = params.url + "/search/" + Ti.Network.encodeURIComponent(params.search);

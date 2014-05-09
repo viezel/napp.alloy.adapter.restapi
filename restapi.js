@@ -125,14 +125,10 @@ function Sync(method, model, opts) {
 		}
 	}
 
-        params.urlparams = params.urlparams || {};
-        // Add in the params from the model, either from a function or literal
-        if ( typeof model.config.URLPARAMS === 'function' ) {
-            _.extend(params.urlparams, model.config.URLPARAMS());
-        }
-        else if ( typeof model.config.URLPARAMS != 'undefined' ) {
-            _.extend(params.urlparams, model.config.URLPARAMS);
-        }
+	// Extend the provided url params with those from the model config
+    if (_.isObject(params.urlparams) || model.config.URLPARAMS) {
+        _.extend(params.urlparams, _.isFunction(model.config.URLPARAMS) ? model.config.URLPARAMS() : model.config.URLPARAMS);
+    }
 
 	// For older servers, emulate JSON by encoding the request into an HTML-form.
 	if (Alloy.Backbone.emulateJSON) {
@@ -297,7 +293,9 @@ function Sync(method, model, opts) {
 function logger(DEBUG, message, data) {
 	if (DEBUG) {
 		Ti.API.debug("[REST API] " + message);
-		Ti.API.debug(typeof data === 'object' ? JSON.stringify(data, null, '\t') : data);
+		if (data) {
+            Ti.API.debug(typeof data === 'object' ? JSON.stringify(data, null, '\t') : data);
+        }
 	}
 }
 

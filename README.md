@@ -5,7 +5,7 @@ RestAPI Sync Adapter for Titanium Alloy Framework.
 
 ### Response Codes
 
-The adapter has been desinged with the following structure.
+The adapter has been designed with the following structure.
 
 * **200:** The request was successful.
 * **201:** The resource was successfully created.

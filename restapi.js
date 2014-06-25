@@ -73,7 +73,7 @@ function apiCall(_options, _callback) {
 				success : false,
 				status : "error",
 				code : this.status,
-				error : err.error,
+				error : e.error,
 				data : error,
 				responseText : this.responseText,
 				responseJSON : responseJSON || null
@@ -81,7 +81,7 @@ function apiCall(_options, _callback) {
 
 			Ti.API.error('[REST API] apiCall ERROR: ' + this.responseText);
 			Ti.API.error('[REST API] apiCall ERROR CODE: ' + this.status);
-			Ti.API.error('[REST API] apiCall ERROR MSG: ' + err.error);
+			Ti.API.error('[REST API] apiCall ERROR MSG: ' + e.error);
 			Ti.API.error('[REST API] apiCall ERROR URL: ' + _options.url);
 
 			cleanup();

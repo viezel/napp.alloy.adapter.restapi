@@ -320,7 +320,13 @@ function Sync(method, model, opts) {
 				Ti.API.error("[REST API] ERROR: MISSING MODEL ID");
 				return;
 			}
-			params.url = params.url + '/' + model[model.idAttribute];
+			//params.url = params.url + '/' + model[model.idAttribute];
+			if (_.indexOf(params.url, "?") == -1) {
+							params.url = params.url + '/' + model.id;
+						} else {
+							var str = params.url.split("?");
+							params.url = str[0] + '/' + model.id + "?" + str[1];
+						}
 
 			logger(DEBUG, "delete options", params);
 

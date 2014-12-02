@@ -263,7 +263,7 @@ function Sync(method, model, opts) {
 						data = [data];
 					}
 
-					model.length = 0;
+					var length = 0;
 					for (var i in data) {
 						var item = {};
 						item = data[i];
@@ -271,10 +271,10 @@ function Sync(method, model, opts) {
 							item[model.idAttribute] = guid();
 						}
 						values.push(item);
-						model.length++;
+						length++;
 					}
 
-					params.success((model.length === 1) ? values[0] : values, _response.responseText);
+					params.success((length === 1) ? values[0] : values, _response.responseText);
 					model.trigger("fetch");
 				} else {
 					params.error(model, _response.responseText);

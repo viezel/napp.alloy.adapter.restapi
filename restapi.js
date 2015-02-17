@@ -201,7 +201,9 @@ function Sync(method, model, opts) {
 	}
 
 	//json data transfers
-	params.headers['Content-Type'] = 'application/json';
+	if (!params.data && model && (method == 'create' || method == 'update')) {
+    	params.headers['Content-Type'] = 'application/json';
+    }
 
 	logger(DEBUG, "REST METHOD", method);
 

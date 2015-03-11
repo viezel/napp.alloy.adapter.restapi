@@ -70,6 +70,35 @@ collection.fetch({
 });
 ```
 
+Another example is that,
+
+```javascript
+// This is the handle for the item
+var model = Alloy.createModel("MyCollection"); 
+
+var params = {
+    field1: "some field",
+    fied2: "another field"
+};
+
+//the fetch method is an async call to the remote REST API.
+model.save(params, {
+    success : function(model) {
+        Ti.API.log("Yay! Success!");
+        Ti.API.log(model);
+    },
+    error : function(err) {
+        Ti.API.error("hmm - this is not good!");
+        Ti.API.error(err);
+    }
+});
+
+```
+
+Under the hood, this API uses the Backbone JS sync functionality. To have a solid understading of this libary, it
+will valuable to understand how does BackboneJS manages CRUD operations.
+
+
 
 ## Special Properties
 

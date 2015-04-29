@@ -176,11 +176,13 @@ The adapter uses the `IF-NONE-MATCH` header to send the newest ETag for the prov
 
 ## Changelog
 
+**v1.1.8**
+Bugfix for model.id # 64
+parentNode can be defined as a function # 63
+
 **v1.1.5**  
 Added ETag support  
 Bugfix for urlparams #34  
-
-
 
 
 **v1.1.4**  

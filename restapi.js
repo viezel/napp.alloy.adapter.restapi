@@ -175,6 +175,7 @@ function Sync(method, model, opts) {
 
 	// Extend the provided url params with those from the model config
 	if (_.isObject(params.urlparams) || model.config.URLPARAMS) {
+        params.urlparams = params.urlparams || {};
 		_.extend(params.urlparams, _.isFunction(model.config.URLPARAMS) ? model.config.URLPARAMS() : model.config.URLPARAMS);
 	}
 

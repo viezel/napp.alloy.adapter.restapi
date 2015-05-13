@@ -48,6 +48,11 @@ Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
 
 Then add the `restapi.js` to `PROJECT_FOLDER/app/assets/alloy/sync/`. Create the folders if they dont exist. 
 
+With curl, you can download latest restapi adapter to your project. Run below command on titanium mobile project folder.
+```
+curl https://raw.githubusercontent.com/viezel/napp.alloy.adapter.restapi/master/restapi.js -o app/assets/alloy/sync/restapi.js --create-dirs
+```
+
 Use the `debug` property in the above example to get logs printed with server response to debug your usage of the restapi adapter.
 
 ### Lets see this in action
@@ -176,9 +181,9 @@ The adapter uses the `IF-NONE-MATCH` header to send the newest ETag for the prov
 
 ## Changelog
 
-**v1.1.8**
-Bugfix for model.id # 64
-parentNode can be defined as a function # 63
+**v1.1.8**  
+Bugfix for model.id #64
+parentNode can be defined as a function #63  
 
 **v1.1.5**  
 Added ETag support  

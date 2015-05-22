@@ -24,9 +24,6 @@ function apiCall(_options, _callback) {
 			timeout : _options.timeout || 7000
 		});
 
-		//Prepare the request
-		xhr.open(_options.type, _options.url);
-
 		xhr.onload = function() {
 			var responseJSON, success = (this.status <= 304) ? "ok" : "error", status = true, error;
 
@@ -101,6 +98,9 @@ function apiCall(_options, _callback) {
 			var etag = getETag(_options.url);
 			etag && xhr.setRequestHeader('IF-NONE-MATCH', etag);
 		}
+		
+		//Prepare the request
+		xhr.open(_options.type, _options.url);
 
 		if (_options.type != 'GET' && !_.isEmpty(_options.data)) {
 			xhr.send(_options.data);

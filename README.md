@@ -181,6 +181,9 @@ The adapter uses the `IF-NONE-MATCH` header to send the newest ETag for the prov
 
 ## Changelog
 
+**v1.1.9**  
+Bugfix for http headers before xhr.open() #67 
+
 **v1.1.8**  
 Bugfix for model.id #64
 parentNode can be defined as a function #63  

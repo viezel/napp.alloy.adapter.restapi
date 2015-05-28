@@ -181,8 +181,8 @@ The adapter uses the `IF-NONE-MATCH` header to send the newest ETag for the prov
 
 ## Changelog
 
-**v1.1.9**  
-Bugfix for http headers before xhr.open() #67 
+**v1.1.10**  
+Bugfix for http headers after xhr.open() but before xhr.send() 
 
 **v1.1.8**  
 Bugfix for model.id #64

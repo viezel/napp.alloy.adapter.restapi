@@ -3,6 +3,19 @@ napp.alloy.adapter.restapi
 
 RestAPI Sync Adapter for Titanium Alloy Framework.
 
+### Response Codes
+
+The adapter has been designed with the following structure.
+
+* **200:** The request was successful.
+* **201:** The resource was successfully created.
+* **204:** The request was successful, but we did not send any content back.
+* **304:** The request was not modified. 
+* **400:** The request failed due to an application error, such as a validation error.
+* **401:** An API key was either not sent or invalid.
+* **403:** The resource does not belong to the authenticated user and is forbidden.
+* **404:** The resource was not found.
+* **500:** A server error occurred.
 
 ## How To Use
 
@@ -35,6 +48,11 @@ Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
 
 Then add the `restapi.js` to `PROJECT_FOLDER/app/assets/alloy/sync/`. Create the folders if they dont exist. 
 
+With curl, you can download latest restapi adapter to your project. Run below command on titanium mobile project folder.
+```
+curl https://raw.githubusercontent.com/viezel/napp.alloy.adapter.restapi/master/restapi.js -o app/assets/alloy/sync/restapi.js --create-dirs
+```
+
 Use the `debug` property in the above example to get logs printed with server response to debug your usage of the restapi adapter.
 
 ### Lets see this in action
@@ -56,6 +74,35 @@ collection.fetch({
 	}
 });
 ```
+
+Another example is that,
+
+```javascript
+// This is the handle for the item
+var model = Alloy.createModel("MyCollection"); 
+
+var params = {
+    field1: "some field",
+    fied2: "another field"
+};
+
+//the fetch method is an async call to the remote REST API.
+model.save(params, {
+    success : function(model) {
+        Ti.API.log("Yay! Success!");
+        Ti.API.log(model);
+    },
+    error : function(err) {
+        Ti.API.error("hmm - this is not good!");
+        Ti.API.error(err);
+    }
+});
+
+```
+
+Under the hood, this API uses the Backbone JS sync functionality. To have a solid understading of this libary, it
+will valuable to understand how does BackboneJS manages CRUD operations.
+
 
 
 ## Special Properties
@@ -115,9 +162,45 @@ parentNode: function (data) {
 }
 ```
 
+### ETag
+
+This feature will only work if your server supports ETags. If you have no idea what this is, then consult your server admin.
+Start be enabling this feature in the model config, like the following:
+
+	config: {
+		...
+		"eTagEnabled" : true
+	}
+
+You do not have to do anything more. The adapter will send and recieve the ETag for every single request and store those locally in the Ti.App.Properties namespace. 
+
+The adapter uses the `IF-NONE-MATCH` header to send the newest ETag for the provided url to the server on each request. Once a succesful response is recieved by the adapter, it will store the new ETag automatically. 
+
+**Notice: This may be a good idea not to use this while developing, because it will cache and store your ETag - which might end up in wrong situations while you are working**
 
 
 ## Changelog
+
+**v1.1.10**  
+Bugfix for http headers after xhr.open() but before xhr.send() 
+
+**v1.1.8**  
+Bugfix for model.id #64
+parentNode can be defined as a function #63  
+
+**v1.1.5**  
+Added ETag support  
+Bugfix for urlparams #34  
+
+
+**v1.1.4**  
+Added search mode
+
+**v1.1.3**  
+Added support for accessing the error object. Issue #29 Thanks @alexandremblah
+
+**v1.1.2**  
+JSON.parse errors are now caught. Thanks @FokkeZB
 
 **v1.1.1**  
 Added support parentNode as a function for custom parsing. thanks @FokkeZB
@@ -158,6 +241,8 @@ twitter: @nappdev
 
 ## License
 
+    The MIT License (MIT)
+    
     Copyright (c) 2010-2013 Mads Møller
 
     Permission is hereby granted, free of charge, to any person obtaining a copy

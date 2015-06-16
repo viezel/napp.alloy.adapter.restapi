@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.1.1
+ * @version 1.1.10
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -23,82 +23,131 @@ function apiCall(_options, _callback) {
 		var xhr = Ti.Network.createHTTPClient({
 			timeout : _options.timeout || 7000
 		});
-	
-		//Prepare the request
-		xhr.open(_options.type, _options.url);
-	
+
 		xhr.onload = function() {
-		  var responseJSON,
-		      success = true,
-		      error;
-		      
-		  try {
-		    responseJSON = JSON.parse(xhr.responseText);
-		  } catch (e) {
-		    Ti.API.error('[REST API] apiCall ERROR: ' + e.message);
-		    success = false;
-		    error = e.message;
-		  }
-		      
+			var responseJSON, success = (this.status <= 304) ? "ok" : "error", status = true, error;
+
+			// save the eTag for future reference
+			if (_options.eTagEnabled && success) {
+				setETag(_options.url, xhr.getResponseHeader('ETag'));
+			}
+
+			// we dont want to parse the JSON on a empty response
+			if (this.status != 304 && this.status != 204) {
+				// parse JSON
+				try {
+					responseJSON = JSON.parse(this.responseText);
+				} catch (e) {
+					Ti.API.error('[REST API] apiCall PARSE ERROR: ' + e.message);
+					Ti.API.error('[REST API] apiCall PARSE ERROR: ' + this.responseText);
+					status = false;
+					error = e.message;
+				}
+			}
+
 			_callback({
-				success : success,
-				status : success ? (xhr.status == 200 ? "ok" : xhr.status) : 'error',
-				code : xhr.status,
-				data: error,
-				responseText : xhr.responseText || null,
+				success : status,
+				status : success,
+				code : this.status,
+				data : error,
+				responseText : this.responseText || null,
 				responseJSON : responseJSON || null
 			});
+
+			cleanup();
 		};
-	
+
 		//Handle error
 		xhr.onerror = function(e) {
-		  var responseJSON;
-		  
-		  try {
-		    responseJSON = JSON.parse(xhr.responseText);
-		  } catch (e) {}
-		  
+			var responseJSON, error;
+			try {
+				responseJSON = JSON.parse(this.responseText);
+			} catch (e) {
+				error = e.message;
+			}
+
 			_callback({
 				success : false,
 				status : "error",
-				code : xhr.status,
-				data : e.error,
-				responseText : xhr.responseText,
-				responseJSON: responseJSON || null
+				code : this.status,
+				error : e.error,
+				data : error,
+				responseText : this.responseText,
+				responseJSON : responseJSON || null
 			});
-			Ti.API.error('[REST API] apiCall ERROR: ' + xhr.responseText);
-			Ti.API.error('[SQL REST API] apiCall ERROR CODE: ' + xhr.status);
-		}
+
+			Ti.API.error('[REST API] apiCall ERROR: ' + this.responseText);
+			Ti.API.error('[REST API] apiCall ERROR CODE: ' + this.status);
+			Ti.API.error('[REST API] apiCall ERROR MSG: ' + e.error);
+			Ti.API.error('[REST API] apiCall ERROR URL: ' + _options.url);
+
+			cleanup();
+		};
+		
+		//Prepare the request
+		xhr.open(_options.type, _options.url);
+
+		// headers
 		for (var header in _options.headers) {
-			xhr.setRequestHeader(header, _options.headers[header]);
+			// use value or function to return value
+			xhr.setRequestHeader(header, _.isFunction(_options.headers[header]) ? _options.headers[header]() : _options.headers[header]);
 		}
-	
+
 		if (_options.beforeSend) {
 			_options.beforeSend(xhr);
 		}
-	
-		xhr.send(_options.data || null);
+
+		if (_options.eTagEnabled) {
+			var etag = getETag(_options.url);
+			etag && xhr.setRequestHeader('IF-NONE-MATCH', etag);
+		}
+
+		if (_options.type != 'GET' && !_.isEmpty(_options.data)) {
+			xhr.send(_options.data);
+		} else {
+			xhr.send();
+		}
 	} else {
-		// Offline
+		// we are offline
 		_callback({
 			success : false,
 			status : "offline",
+			offline : true,
 			responseText : null
 		});
 	}
+
+	/**
+	 * Clean up the request
+	 */
+	function cleanup() {
+		xhr = null;
+		_options = null;
+		_callback = null;
+		error = null;
+		responseJSON = null;
+	}
+
 }
 
 function Sync(method, model, opts) {
-	var DEBUG = model.config.debug;
 	model.idAttribute = model.config.adapter.idAttribute || "id";
+
+	// Debug mode
+	var DEBUG = model.config.debug;
+
+	// eTag enabled
+	var eTagEnabled = model.config.eTagEnabled;
+
+	// Used for custom parsing of the response data
 	var parentNode = model.config.parentNode;
-	
+
 	// REST - CRUD
 	var methodMap = {
-		'create' 	: 'POST',
-		'read' 		: 'GET',
-		'update' 	: 'PUT',
-		'delete' 	: 'DELETE'
+		'create' : 'POST',
+		'read' : 'GET',
+		'update' : 'PUT',
+		'delete' : 'DELETE'
 	};
 
 	var type = methodMap[method];
@@ -107,14 +156,14 @@ function Sync(method, model, opts) {
 
 	//set default headers
 	params.headers = params.headers || {};
-	
+
 	// Send our own custom headers
-	if(model.config.hasOwnProperty("headers")) {
-		for(header in model.config.headers) {
+	if (model.config.hasOwnProperty("headers")) {
+		for (var header in model.config.headers) {
 			params.headers[header] = model.config.headers[header];
 		}
 	}
-	
+
 	// We need to ensure that we have a base url.
 	if (!params.url) {
 		params.url = (model.config.URL || model.url());
@@ -122,6 +171,12 @@ function Sync(method, model, opts) {
 			Ti.API.error("[REST API] ERROR: NO BASE URL");
 			return;
 		}
+	}
+
+	// Extend the provided url params with those from the model config
+	if (_.isObject(params.urlparams) || model.config.URLPARAMS) {
+        params.urlparams = params.urlparams || {};
+		_.extend(params.urlparams, _.isFunction(model.config.URLPARAMS) ? model.config.URLPARAMS() : model.config.URLPARAMS);
 	}
 
 	// For older servers, emulate JSON by encoding the request into an HTML-form.
@@ -141,28 +196,30 @@ function Sync(method, model, opts) {
 				params.data._method = type;
 			params.type = 'POST';
 			params.beforeSend = function(xhr) {
-				params.headers['X-HTTP-Method-Override'] = type
+				params.headers['X-HTTP-Method-Override'] = type;
 			};
 		}
 	}
 
 	//json data transfers
-	params.headers['Content-Type'] = 'application/json';
+	if (!params.data && model && (method == 'create' || method == 'update')) {
+    	params.headers['Content-Type'] = 'application/json';
+    }
 
-	logger(DEBUG, "REST METHOD" , method);
-	
+	logger(DEBUG, "REST METHOD", method);
+
 	switch(method) {
 		case 'create' :
 			// convert to string for API call
 			params.data = JSON.stringify(model.toJSON());
-			logger(DEBUG, "create options" , params);
-			
+			logger(DEBUG, "create options", params);
+
 			apiCall(params, function(_response) {
 				if (_response.success) {
-					var data = parseJSON(DEBUG, _response, parentNode);
-					
+					var data = parseJSON(DEBUG, _response, parentNode, model);
+
 					//Rest API should return a new model id.
-					if (data[model.idAttribute] == undefined) {
+					if (data[model.idAttribute] === undefined) {
 						//if not - create one
 						data[model.idAttribute] = guid();
 					}
@@ -176,96 +233,123 @@ function Sync(method, model, opts) {
 				}
 			});
 			break;
-			
+
 		case 'read':
-			if (model[model.idAttribute]) {
-				params.url = params.url + '/' + model[model.idAttribute];
+			if (model.id) {
+				params.url = params.url + '/' + model.id;
 			}
 
-			if(params.urlparams){ // build url with parameters
-                params.url = encodeData(params.urlparams, params.url);
+			if (params.search) {
+				// search mode
+				params.url = params.url + "/search/" + Ti.Network.encodeURIComponent(params.search);
+			}
+
+			if (params.urlparams) {
+				// build url with parameters
+				params.url = encodeData(params.urlparams, params.url);
+			}
+
+			if ( ! params.urlparams && params.data) {
+                // If we have set optional parameters on the request we should use it
+                // when params.urlparams fails/is empty.
+                params.url = encodeData(params.data, params.url);
             }
-            
-			logger(DEBUG, "read options" , params);
-			
+
+			if (eTagEnabled) {
+				params.eTagEnabled = true;
+			}
+
+			logger(DEBUG, "read options", params);
+
 			apiCall(params, function(_response) {
 				if (_response.success) {
-					var data = parseJSON(DEBUG, _response, parentNode);
+					var data = parseJSON(DEBUG, _response, parentNode, model);
 					var values = [];
-					model.length = 0;
+
+					if (!_.isArray(data)) {
+						data = [data];
+					}
+
+					var length = 0;
 					for (var i in data) {
 						var item = {};
 						item = data[i];
-						if (item[model.idAttribute] == undefined) {
+						if (item[model.idAttribute] === undefined) {
 							item[model.idAttribute] = guid();
 						}
 						values.push(item);
-						model.length++;
+						length++;
 					}
 
-					params.success((model.length === 1) ? values[0] : values, _response.responseText);
+					params.success((length === 1) ? values[0] : values, _response.responseText);
 					model.trigger("fetch");
 				} else {
-					params.error(_response.responseJSON, _response.responseText);
+					params.error(model, _response.responseText);
 					Ti.API.error('[REST API] READ ERROR: ');
 					Ti.API.error(_response);
 				}
-			})
+			});
 			break;
-		
+
 		case 'update' :
-			if (!model[model.idAttribute]) {
+			if (!model.id) {
 				params.error(null, "MISSING MODEL ID");
 				Ti.API.error("[REST API] ERROR: MISSING MODEL ID");
 				return;
 			}
 
 			// setup the url & data
-			if(_.indexOf(params.url, "?") == -1) {
-				params.url = params.url + '/' + model[model.idAttribute];
+			if (_.indexOf(params.url, "?") == -1) {
+				params.url = params.url + '/' + model.id;
 			} else {
 				var str = params.url.split("?");
-				params.url = str[0] + '/' + model[model.idAttribute] + "?" + str[1];
+				params.url = str[0] + '/' + model.id + "?" + str[1];
 			}
-			
-			if(params.urlparams){
-                params.url = encodeData(params.urlparams, params.url);
-            }
-            
+
+			if (params.urlparams) {
+				params.url = encodeData(params.urlparams, params.url);
+			}
+
 			params.data = JSON.stringify(model.toJSON());
 
-			logger(DEBUG, "update options" , params);
-			
+			logger(DEBUG, "update options", params);
+
 			apiCall(params, function(_response) {
 				if (_response.success) {
-					var data = parseJSON(DEBUG, _response, parentNode);
+					var data = parseJSON(DEBUG, _response, parentNode, model);
 					params.success(data, JSON.stringify(data));
 					model.trigger("fetch");
 				} else {
-					params.error(_response.responseJSON, _response.responseText);
+					params.error(model, _response.responseText);
 					Ti.API.error('[REST API] UPDATE ERROR: ');
 					Ti.API.error(_response);
 				}
 			});
 			break;
-			
+
 		case 'delete' :
-			if (!model[model.idAttribute]) {
+			if (!model.id) {
 				params.error(null, "MISSING MODEL ID");
 				Ti.API.error("[REST API] ERROR: MISSING MODEL ID");
 				return;
 			}
-			params.url = params.url + '/' + model[model.idAttribute];
+			//params.url = params.url + '/' + model.id;
+			if (_.indexOf(params.url, "?") == -1) {
+							params.url = params.url + '/' + model.id;
+						} else {
+							var str = params.url.split("?");
+							params.url = str[0] + '/' + model.id + "?" + str[1];
+						}
 
-			logger(DEBUG, "delete options" , params);
-			
+			logger(DEBUG, "delete options", params);
+
 			apiCall(params, function(_response) {
 				if (_response.success) {
-					var data = parseJSON(DEBUG, _response, parentNode);
+					var data = parseJSON(DEBUG, _response, parentNode, model);
 					params.success(null, _response.responseText);
 					model.trigger("fetch");
 				} else {
-					params.error(_response.responseJSON, _response.responseText);
+					params.error(model, _response.responseText);
 					Ti.API.error('[REST API] DELETE ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -273,25 +357,27 @@ function Sync(method, model, opts) {
 			break;
 	}
 
-};
+}
 
 /////////////////////////////////////////////
 // HELPERS
 /////////////////////////////////////////////
 
 function logger(DEBUG, message, data) {
-	if(DEBUG){ 
+	if (DEBUG) {
 		Ti.API.debug("[REST API] " + message);
-		Ti.API.debug(data) 
+		if (data) {
+			Ti.API.debug( typeof data === 'object' ? JSON.stringify(data, null, '\t') : data);
+		}
 	}
 }
 
-function parseJSON(DEBUG, _response, parentNode){
+function parseJSON(DEBUG, _response, parentNode, model) {
 	var data = _response.responseJSON;
-	if(!_.isUndefined(parentNode)){
-		data = _.isFunction(parentNode) ? parentNode(data) : traverseProperties(data, parentNode);
+	if (!_.isUndefined(parentNode)) {
+		data = _.isFunction(parentNode) ? parentNode(data, _response, model) : traverseProperties(data, parentNode);
 	}
-	logger(DEBUG, "server response" , data);
+	logger(DEBUG, "server response", _response);
 	return data;
 }
 
@@ -305,17 +391,39 @@ function traverseProperties(object, string) {
 
 function encodeData(obj, url) {
 	var str = [];
-	for(var p in obj){
+	for (var p in obj) {
 		str.push(Ti.Network.encodeURIComponent(p) + "=" + Ti.Network.encodeURIComponent(obj[p]));
 	}
-		
-	if(_.indexOf(url, "?") == -1) {
+
+	if (_.indexOf(url, "?") == -1) {
 		return url + "?" + str.join("&");
 	} else {
 		return url + "&" + str.join("&");
 	}
 }
 
+/**
+ * Get the ETag for the given url
+ * @param {Object} url
+ */
+function getETag(url) {
+	var obj = Ti.App.Properties.getObject("NAPP_REST_ADAPTER", {});
+	var data = obj[url];
+	return data || null;
+}
+
+/**
+ * Set the ETag for the given url
+ * @param {Object} url
+ * @param {Object} eTag
+ */
+function setETag(url, eTag) {
+	if (eTag && url) {
+		var obj = Ti.App.Properties.getObject("NAPP_REST_ADAPTER", {});
+		obj[url] = eTag;
+		Ti.App.Properties.setObject("NAPP_REST_ADAPTER", obj);
+	}
+}
 
 //we need underscore
 var _ = require("alloy/underscore")._;

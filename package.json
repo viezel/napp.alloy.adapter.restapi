@@ -1,0 +1,21 @@
+{
+  "name": "alloy-sync-restapi",
+  "appc-npm": {
+    "target": {
+      "alloy": "app/lib/alloy/sync/"
+    },
+    "ignore": [
+      "package.json",
+      ".git",
+      "README.md"
+    ]
+  },
+  "version": "1.0.0",
+  "scripts": {
+    "postinstall": "node ./appc-npm"
+  },
+  "keywords": [
+    "appc-npm",
+    "alloy-sync"
+  ]
+}

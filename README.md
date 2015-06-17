@@ -19,7 +19,13 @@ The adapter has been designed with the following structure.
 
 ## How To Use
 
-Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
+Download [restapi.js](restapi.js) to `PROJECT_FOLDER/app/assets/alloy/sync/` or use NPM thanks to [appc-npm](https://www.npmjs.com/package/appc-npm):
+
+```
+npm install alloy-sync-restapi --save
+```
+
+Add the following to your model in `PROJECT_FOLDER/app/models/`.
 
 	exports.definition = {	
 		config: {
@@ -45,13 +51,6 @@ Simple add the following to your model in `PROJECT_FOLDER/app/models/`.
 			return Collection;
 		}		
 	}
-
-Then add the `restapi.js` to `PROJECT_FOLDER/app/assets/alloy/sync/`. Create the folders if they dont exist. 
-
-With curl, you can download latest restapi adapter to your project. Run below command on titanium mobile project folder.
-```
-curl https://raw.githubusercontent.com/viezel/napp.alloy.adapter.restapi/master/restapi.js -o app/assets/alloy/sync/restapi.js --create-dirs
-```
 
 Use the `debug` property in the above example to get logs printed with server response to debug your usage of the restapi adapter.
 

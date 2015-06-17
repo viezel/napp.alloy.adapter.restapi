@@ -1,5 +1,11 @@
 {
   "name": "alloy-sync-restapi",
+  "version": "1.1.10",
+  "description": "RestAPI Sync Adapter for Titanium Alloy",
+  "author": {
+    "name": "Mads Møller",
+    "email": "mm@napp.dk"
+  },
   "appc-npm": {
     "target": {
       "alloy": "app/lib/alloy/sync/"
@@ -10,12 +16,15 @@
       "README.md"
     ]
   },
-  "version": "1.0.0",
   "scripts": {
     "postinstall": "node ./appc-npm"
   },
   "keywords": [
     "appc-npm",
-    "alloy-sync"
+    "alloy-sync",
+    "napp",
+    "rest",
+    "crud",
+    "titanium"
   ]
 }

@@ -274,7 +274,7 @@ function Sync(method, model, opts) {
 					for (var i in data) {
 						var item = {};
 						item = data[i];
-						if (item[model.idAttribute] === undefined) {
+						if (item && item[model.idAttribute] === undefined) {
 							item[model.idAttribute] = guid();
 						}
 						values.push(item);

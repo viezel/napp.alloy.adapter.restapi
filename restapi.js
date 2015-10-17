@@ -156,7 +156,7 @@ function Sync(method, model, opts) {
 
 	var type = methodMap[method];
 	var params = _.extend({}, opts);
-	params.type = type;
+	params.type = opts.requestMethod || type;
 
 	//set default headers
 	params.headers = params.headers || {};

@@ -257,7 +257,7 @@ function Sync(method, model, opts) {
 				params.url = encodeData(params.urlparams, params.url);
 			}
 
-			if ( ! params.urlparams && params.data) {
+			if ( ! params.urlparams && params.type !== "POST" && params.data) {
                 // If we have set optional parameters on the request we should use it
                 // when params.urlparams fails/is empty.
                 params.url = encodeData(params.data, params.url);

@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.1.10
+ * @version 1.1.11
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -83,11 +83,11 @@ function apiCall(_options, _callback) {
 
 			cleanup();
 		};
-		
+
 		if (_options.beforeOpen) {
 			_options.beforeOpen(xhr);
 		}
-		
+
 		//Prepare the request
 		xhr.open(_options.type, _options.url);
 
@@ -156,7 +156,7 @@ function Sync(method, model, opts) {
 
 	var type = methodMap[method];
 	var params = _.extend({}, opts);
-	params.type = type;
+	params.type = opts.requestMethod || type;
 
 	//set default headers
 	params.headers = params.headers || {};
@@ -257,7 +257,7 @@ function Sync(method, model, opts) {
 				params.url = encodeData(params.urlparams, params.url);
 			}
 
-			if ( ! params.urlparams && params.data) {
+			if ( ! params.urlparams && params.type !== "POST" && params.data) {
                 // If we have set optional parameters on the request we should use it
                 // when params.urlparams fails/is empty.
                 params.url = encodeData(params.data, params.url);

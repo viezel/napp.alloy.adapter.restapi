@@ -1,7 +1,7 @@
 /**
  * Rest API Adapter for Titanium Alloy
  * @author Mads Møller
- * @version 1.1.10
+ * @version 1.1.11
  * Copyright Napp ApS
  * www.napp.dk
  */
@@ -83,11 +83,11 @@ function apiCall(_options, _callback) {
 
 			cleanup();
 		};
-		
+
 		if (_options.beforeOpen) {
 			_options.beforeOpen(xhr);
 		}
-		
+
 		//Prepare the request
 		xhr.open(_options.type, _options.url);
 

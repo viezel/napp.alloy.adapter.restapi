@@ -10,7 +10,7 @@ The adapter has been designed with the following structure.
 * **200:** The request was successful.
 * **201:** The resource was successfully created.
 * **204:** The request was successful, but we did not send any content back.
-* **304:** The request was not modified. 
+* **304:** The request was not modified.
 * **400:** The request failed due to an application error, such as a validation error.
 * **401:** An API key was either not sent or invalid.
 * **403:** The resource does not belong to the authenticated user and is forbidden.
@@ -27,10 +27,10 @@ npm install alloy-sync-restapi --save
 
 Add the following to your model in `PROJECT_FOLDER/app/models/`.
 
-	exports.definition = {	
+	exports.definition = {
 		config: {
 			"URL": "http://example.com/api/modelname",
-			//"debug": 1, 
+			//"debug": 1,
 			"adapter": {
 				"type": "restapi",
 				"collection_name": "MyCollection",
@@ -45,7 +45,7 @@ Add the following to your model in `PROJECT_FOLDER/app/models/`.
 		extendModel: function(Model) {		
 			_.extend(Model.prototype, {});
 			return Model;
-		},	
+		},
 		extendCollection: function(Collection) {		
 			_.extend(Collection.prototype, {});
 			return Collection;
@@ -60,8 +60,8 @@ In your Alloy controller, do would use the REST API adapter like this:
 
 ```javascript
 var collection = Alloy.createCollection("MyCollection"); //or model
-//the fetch method is an async call to the remote REST API. 
-collection.fetch({ 
+//the fetch method is an async call to the remote REST API.
+collection.fetch({
 	success : function(){
 		_.each(collection.models, function(element, index, list){
 			// We are looping through the returned models from the remote REST API
@@ -78,7 +78,7 @@ Another example is that,
 
 ```javascript
 // This is the handle for the item
-var model = Alloy.createModel("MyCollection"); 
+var model = Alloy.createModel("MyCollection");
 
 var params = {
     field1: "some field",
@@ -118,25 +118,25 @@ Define your own custom headers. E.g. to add a BaaS API
 
 ### Nested Result Objects
 
-Lets say you have a REST API where the result objects are nested. Like the Twitter search API. It has the found tweets in a results object. 
-Use the `parentNode` to specify from which root object you want to parse children objects. 
+Lets say you have a REST API where the result objects are nested. Like the Twitter search API. It has the found tweets in a results object.
+Use the `parentNode` to specify from which root object you want to parse children objects.
 
 
 	config: {
 		...
 		"parentNode" : "results"
 	}
-	
-It has support for nested objects. 
-	
+
+It has support for nested objects.
+
 	config: {
 		...
 		"parentNode" : "news.domestic"
 	}
 
-Since v1.1.1 - you can specify this object as a function instead to custom parse the feed. Here is an example: 
+Since v1.1.1 - you can specify this object as a function instead to custom parse the feed. Here is an example:
 
-*Feed:* 
+*Feed:*
 http://www.google.com/calendar/feeds/developer-calendar@google.com/public/full?alt=json&orderby=starttime&max-results=15&singleevents=true&sortorder=ascending&futureevents=true
 
 *Custom parsing:*
@@ -171,17 +171,27 @@ Start be enabling this feature in the model config, like the following:
 		"eTagEnabled" : true
 	}
 
-You do not have to do anything more. The adapter will send and recieve the ETag for every single request and store those locally in the Ti.App.Properties namespace. 
+You do not have to do anything more. The adapter will send and recieve the ETag for every single request and store those locally in the Ti.App.Properties namespace.
 
-The adapter uses the `IF-NONE-MATCH` header to send the newest ETag for the provided url to the server on each request. Once a succesful response is recieved by the adapter, it will store the new ETag automatically. 
+The adapter uses the `IF-NONE-MATCH` header to send the newest ETag for the provided url to the server on each request. Once a succesful response is recieved by the adapter, it will store the new ETag automatically.
 
 **Notice: This may be a good idea not to use this while developing, because it will cache and store your ETag - which might end up in wrong situations while you are working**
 
+## Fetch data from POST requests
+@Since v1.1.11 you can send requestMethod to fetch data from POST service
+```javascript
+myModel.fetch({
+	requestMethod: 'POST' // GET is default
+})
+```
 
 ## Changelog
 
+**v1.1.11**  
+Now you can set http request method in fetch, property name is requestMethod
+
 **v1.1.10**  
-Bugfix for http headers after xhr.open() but before xhr.send() 
+Bugfix for http headers after xhr.open() but before xhr.send()
 
 **v1.1.8**  
 Bugfix for model.id #64
@@ -220,7 +230,7 @@ Added debug
 
 **v1.0.3**  
 Alloy 1.0.0.  
-Fix bug in rest url being global 
+Fix bug in rest url being global
 
 **v1.0.2**  
 Added urlparams
@@ -241,7 +251,7 @@ twitter: @nappdev
 ## License
 
     The MIT License (MIT)
-    
+
     Copyright (c) 2010-2013 Mads Møller
 
     Permission is hereby granted, free of charge, to any person obtaining a copy

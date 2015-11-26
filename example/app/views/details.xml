@@ -1,0 +1,8 @@
+<Alloy>
+	<Window id="details">
+		<View class="container">
+			<Button id="close" onClick="closeDetails"/>
+			<Label id="userDetails"/>
+		</View>
+	</Window>
+</Alloy>

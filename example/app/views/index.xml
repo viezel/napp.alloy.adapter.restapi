@@ -1,0 +1,20 @@
+<Alloy>
+	<Collection src="users"/>
+	<Window class="container">
+		<Button id="addButton" onClick="addUser"/>
+		<ListView id="userList" defaultItemTemplate="user" onItemclick="userProfile">
+			<Templates>
+
+				<ItemTemplate bindId="user" name="user">
+					<Label bindId="name" class="name"/>
+				</ItemTemplate>
+
+			</Templates>
+
+			<ListSection id="section" dataCollection="users">
+				<ListItem template="user" user:id="{id}" name:text="{name}"/>
+			</ListSection>
+
+		</ListView>
+	</Window>
+</Alloy>

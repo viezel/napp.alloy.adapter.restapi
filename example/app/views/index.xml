@@ -12,6 +12,8 @@
 			</Templates>
 
 			<ListSection id="section" dataCollection="users">
+				<!-- We need to add the ID of each model in the Collection
+				so that we can use it later to get a specific user by their ID -->
 				<ListItem template="user" user:id="{id}" name:text="{name}"/>
 			</ListSection>
 

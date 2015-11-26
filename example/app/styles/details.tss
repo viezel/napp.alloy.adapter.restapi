@@ -1,5 +1,26 @@
-"#close": {
+"#buttons": {
+	height: Ti.UI.SIZE,
+	width: Ti.UI.SIZE,
+	layout: 'horizontal',
+	top: 20
+}
+
+"#closeButton": {
 	title: 'Close',
+	width: 100
+}
+
+"#updateButton": {
+	title: 'Update',
+	width: 100
+}
+
+"#deleteButton": {
+	title: 'Delete',
+	width: 100
+}
+
+"#detailsContainer": {
 	top: 20,
-	left: 10
+	layout: 'vertical'
 }

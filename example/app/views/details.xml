@@ -1,8 +1,20 @@
 <Alloy>
-	<Window id="details">
+	<Window id="detailsWindow">
 		<View class="container">
-			<Button id="close" onClick="closeDetails"/>
-			<Label id="userDetails"/>
+			<View id="buttons">
+				<Button id="closeButton" onClick="closeDetails"/>
+				<Button id="updateButton" onClick="updateUser"/>
+				<Button id="deleteButton" onClick="deleteUser"/>
+			</View>
+			<View id="detailsContainer">
+				<Label id="name"/>
+				<Label id="username"/>
+				<Label id="email"/>
+				<Label id="phone"/>
+				<Label id="website"/>
+				<Label id="address"/>
+				<Label id="company"/>
+			</View>
 		</View>
 	</Window>
 </Alloy>

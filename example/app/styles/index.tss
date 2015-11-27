@@ -1,0 +1,16 @@
+".container": {
+	layout: 'vertical'
+}
+
+"#addButton": {
+	title: 'Add User',
+	top: 20
+}
+
+"#userList": {
+	top: 20
+}
+
+"#row": {
+	height: 100
+}

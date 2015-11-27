@@ -1,0 +1,14 @@
+".container": {
+	backgroundColor:"white",
+	layout: 'vertical'
+}
+
+"Label": {
+	color: "#000"
+}
+
+"#label": {
+	font: {
+		fontSize: 11
+	}
+}

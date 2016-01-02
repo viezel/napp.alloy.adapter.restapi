@@ -187,6 +187,9 @@ myModel.fetch({
 
 ## Changelog
 
+**v1.1.12**  
+Allow pass urlparams for model.destroy()
+
 **v1.1.11**  
 Now you can set http request method in fetch, property name is requestMethod
 

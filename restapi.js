@@ -349,6 +349,10 @@ function Sync(method, model, opts) {
 							params.url = str[0] + '/' + model.id + "?" + str[1];
 						}
 
+			if (params.urlparams) {
+				params.url = encodeData(params.urlparams, params.url);
+			}
+			
 			logger(DEBUG, "delete options", params);
 
 			apiCall(params, function(_response) {

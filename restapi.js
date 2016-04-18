@@ -235,7 +235,7 @@ function Sync(method, model, opts) {
 					model.trigger("fetch");
 					// fire event
 				} else {
-					params.error(_response.responseJSON, _response.responseText);
+					Alloy.Backbone.VERSION === '0.9.2' ? params.error(_response.responseJSON, _response.responseText) : params.error(_response.responseText);
 					Ti.API.error('[REST API] CREATE ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -292,7 +292,7 @@ function Sync(method, model, opts) {
 					params.success((length === 1) ? values[0] : values, _response.responseText);
 					model.trigger("fetch");
 				} else {
-					params.error(model, _response.responseText);
+					Alloy.Backbone.VERSION === '0.9.2' ? params.error(model, _response.responseText) : params.error(_response.responseText);
 					Ti.API.error('[REST API] READ ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -328,7 +328,7 @@ function Sync(method, model, opts) {
 					params.success(data, JSON.stringify(data));
 					model.trigger("fetch");
 				} else {
-					params.error(model, _response.responseText);
+					Alloy.Backbone.VERSION === '0.9.2' ? params.error(model, _response.responseText) : params.error(_response.responseText);
 					Ti.API.error('[REST API] UPDATE ERROR: ');
 					Ti.API.error(_response);
 				}
@@ -361,7 +361,7 @@ function Sync(method, model, opts) {
 					params.success(null, _response.responseText);
 					model.trigger("fetch");
 				} else {
-					params.error(model, _response.responseText);
+					Alloy.Backbone.VERSION === '0.9.2' ? params.error(model, _response.responseText) : params.error(_response.responseText);
 					Ti.API.error('[REST API] DELETE ERROR: ');
 					Ti.API.error(_response);
 				}

@@ -187,6 +187,9 @@ myModel.fetch({
 
 ## Changelog
 
+**v1.1.13**  
+BugFix for no responseText from a successful response
+
 **v1.1.12**  
 Allow pass urlparams for model.destroy()
 
